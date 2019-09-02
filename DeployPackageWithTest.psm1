@@ -17,3 +17,4 @@
         sfdx force:source:deploy -x $package -l RunSpecifiedTests -r $tests -u $userName
     }
 }
+Export-ModuleMember -Function DeployPackageWithTest
