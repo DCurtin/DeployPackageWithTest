@@ -1,12 +1,25 @@
 ﻿function DeployPackageWithTest
 {
     param(
-        $userName,
-        $package,
+        $userName='',
+        $package='',
         $checkOnly=$false
     )
 
-    #$tests = $(Get-ChildItem -Recurse "*Test.cls").name.replace('.cls', '') -join ','
+    if($userName -eq '' -and $package -eq '')
+    {
+        Write-Host "Available paramters: `n* userName [required] `n* package [required] `n* checkOnly [optional]`n"
+        Write-Host "e.g. DeployPackageWithTest -userName dcurtin@midlandira.com.dcurtin -package .\manifest\package.xml"
+        Write-Host "e.g. DeployPackageWithTest -userName dcurtin@midlandira.com.dcurtin -package .\manifest\package.xml -checkOnly $true"
+        return
+    }
+
+    if($userName -eq '' -or $package -eq '')
+    {
+        Write-Host "userName and package required. `ne.g. DeployPackageWithTest -userName dcurtin@midlandira.com.dcurtin -package .\manifest\package.xml"
+        return
+    }
+    
     [xml]$packake_import = Get-Content $package
     $tests = $($packake_import.Package.types.members -match "Test") -join ','
     
