@@ -21,8 +21,16 @@
     }
     
     [xml]$packake_import = Get-Content $package
-    $tests = $($packake_import.Package.types.members -match "Test") -join ','
+    [System.Collections.ArrayList] $testList = @();
+    $packake_import.Package.types | ForEach-Object -Process ({
+        if($_.name -eq "ApexClass" -and $_.members -match "Test$")
+        {
+            $null = $testList.add($_.members);
+        }
+    })
     
+    $tests = $testList -join ',';
+
     if($checkOnly -eq "True")
     {
         sfdx force:source:deploy -x $package -l RunSpecifiedTests -r $tests -u $userName -c
