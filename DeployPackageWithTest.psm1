@@ -3,7 +3,8 @@
     param(
         $userName='',
         $package='',
-        $checkOnly=$false
+        $checkOnly=$false,
+        $generateCommand=$false
     )
 
     if($userName -eq '' -and $package -eq '')
@@ -21,13 +22,37 @@
     }
     
     [xml]$packake_import = Get-Content $package
-    $tests = $($packake_import.Package.types.members -match "Test") -join ','
+    [System.Collections.ArrayList] $testList = @();
+    $packake_import.Package.types | ForEach-Object -Process (
+    {
+        if($_.name -eq 'ApexClass')
+        {
+            $_.members | ForEach-Object -Process (
+            {
+                if($_ -match "Test$")
+                {
+                    $null = $testList.add($_);
+                    Write-Host "$_"
+                }
+            })
+        }
+    })
+    $tests = $testList -join ",";
     
+    $command = '';
+
     if($checkOnly -eq "True")
     {
-        sfdx force:source:deploy -x $package -l RunSpecifiedTests -r $tests -u $userName -c
+        $command = "sfdx force:source:deploy -x $package -l RunSpecifiedTests -r $tests -u $userName -c"
     }else{
-        sfdx force:source:deploy -x $package -l RunSpecifiedTests -r $tests -u $userName
+        $command = "sfdx force:source:deploy -x $package -l RunSpecifiedTests -r $tests -u $userName"
+    }
+
+    if($generateCommand -eq "True")
+    {
+        echo $command
+    }else{
+        Invoke-expression -command $command
     }
 }
 Export-ModuleMember -Function DeployPackageWithTest
