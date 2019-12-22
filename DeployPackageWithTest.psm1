@@ -23,6 +23,7 @@
     
     [xml]$packake_import = Get-Content $package
     [System.Collections.ArrayList] $testList = @();
+<<<<<<< HEAD
     $packake_import.Package.types | ForEach-Object -Process (
     {
         if($_.name -eq 'ApexClass')
@@ -40,6 +41,16 @@
     $tests = $testList -join ",";
     
     $command = '';
+=======
+    $packake_import.Package.types | ForEach-Object -Process ({
+        if($_.name -eq "ApexClass" -and $_.members -match "Test$")
+        {
+            $null = $testList.add($_.members);
+        }
+    })
+    
+    $tests = $testList -join ',';
+>>>>>>> 9f1f229f284c508de044a52be468e70afedcc475
 
     if($checkOnly -eq "True")
     {
